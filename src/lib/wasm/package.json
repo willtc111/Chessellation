@@ -1,0 +1,17 @@
+{
+  "name": "chessellation",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "chessellation_bg.wasm",
+    "chessellation.js",
+    "chessellation_bg.js",
+    "chessellation.d.ts"
+  ],
+  "main": "chessellation.js",
+  "types": "chessellation.d.ts",
+  "sideEffects": [
+    "./chessellation.js",
+    "./snippets/*"
+  ]
+}

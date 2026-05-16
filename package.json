@@ -7,7 +7,7 @@
 		"dev": "concurrently \"npm run dev:frontend\" \"npm run dev:wasm\"",
 		"dev:frontend": "vite dev",
 		"dev:wasm": "cd rust-wasm && cargo watch -s \"wasm-pack build --target bundler --out-dir ../src/lib/wasm/\"",
-		"build": "npm run build:wasm && npm run build:frontend",
+		"build": "npm run build:frontend",
 		"build:frontend": "wrangler types --check && vite build",
 		"build:wasm": "cd rust-wasm && wasm-pack build --target bundler --out-dir ../src/lib/wasm/",
 		"preview": "vite preview",
