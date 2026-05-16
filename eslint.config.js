@@ -11,6 +11,9 @@ import svelteConfig from "./svelte.config.js";
 const gitignorePath = path.resolve(import.meta.dirname, ".gitignore");
 
 export default defineConfig(
+	{
+		ignores: ["rust-wasm/**", "src/lib/wasm/**", "worker-configuration.d.ts"],
+	},
 	includeIgnoreFile(gitignorePath),
 	js.configs.recommended,
 	ts.configs.recommended,

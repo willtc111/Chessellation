@@ -1,6 +1,6 @@
 # Chessellation
 
-Fill the plane in a spiral pattern following kernel-based rules.
+Fill the plane in a spiral pattern following kernel-based rules to generate interesting patterns.
 
 Inspired by Red & Black Knights: https://www.youtube.com/watch?v=UiX4CFIiegM
 
