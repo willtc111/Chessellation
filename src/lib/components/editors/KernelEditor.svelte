@@ -8,7 +8,7 @@
 		presetIndex = 0;
 	}
 
-	let presetIndex: number | undefined = $state(0);
+	let presetIndex: number | undefined = $state(undefined);
 	function loadPreset() {
 		if (presetIndex == undefined) {
 			return;

@@ -5,5 +5,5 @@ import { __wbg_set_wasm } from "./chessellation_bg.js";
 __wbg_set_wasm(wasm);
 wasm.__wbindgen_start();
 export {
-    Chessellator, init
+    Chessellator, start
 } from "./chessellation_bg.js";

@@ -44,8 +44,8 @@ export class Chessellator {
 }
 if (Symbol.dispose) Chessellator.prototype[Symbol.dispose] = Chessellator.prototype.free;
 
-export function init() {
-    wasm.init();
+export function start() {
+    wasm.start();
 }
 export function __wbg___wbindgen_throw_be289d5034ed271b(arg0, arg1) {
     throw new Error(getStringFromWasm0(arg0, arg1));

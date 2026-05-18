@@ -10,4 +10,4 @@ export class Chessellator {
     step(): void;
 }
 
-export function init(): void;
+export function start(): void;

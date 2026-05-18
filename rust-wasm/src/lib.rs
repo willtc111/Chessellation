@@ -1,7 +1,7 @@
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
-pub fn init() {
+pub fn start() {
     wasm_logger::init(wasm_logger::Config::default());
 }
 

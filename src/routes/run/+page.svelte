@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { convertToInputs } from "$lib/input.js";
-	import { Chessellator, init } from "$lib/wasm/chessellation";
+	import { Chessellator } from "$lib/wasm/chessellation";
 	import { onMount, onDestroy } from "svelte";
 	import { Application, Graphics } from "pixi.js";
 	import type { Team } from "$lib/teams";
+	import LogoLink from "$lib/components/LogoLink.svelte";
+	import { resolve } from "$app/paths";
+	import { page } from "$app/stores";
 
 	let { data }: { data: { teams: Team[]; error: string } } = $props();
 
@@ -11,6 +14,7 @@
 	let error: string | null = $state(null);
 	let running = $state(false);
 	let rafId: number;
+	let squareCount = $state(0);
 
 	let canvas: HTMLCanvasElement;
 	let app: Application;
@@ -29,9 +33,6 @@
 	}
 
 	onMount(async () => {
-		// Initialize the WASM module
-		await init();
-
 		if (!canvas) {
 			console.log(canvas);
 			return;
@@ -105,6 +106,7 @@
 			const y = changes[i + 1];
 			const team = changes[i + 2];
 			g.rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE).fill(getTeamColor(team));
+			squareCount += 1;
 		}
 		app.stage.addChild(g);
 	}
@@ -134,29 +136,34 @@
 </script>
 
 <svelte:head>
-	<title>Run | Chessellation</title>
+	<title>Run Chessellation</title>
 </svelte:head>
 
-<div class="container">
-	<canvas bind:this={canvas}></canvas>
+<div class="relative h-screen w-screen overflow-hidden">
+	<canvas bind:this={canvas} class="block h-full w-full"></canvas>
 	{#if error}
 		<p>{error}</p>
 	{:else if chessellator}
-		<div class="controls">
-			<button onclick={() => step()}>Step</button>
-			<button onclick={toggleRun}>{running ? "Pause" : "Run"}</button>
+		<header
+			class="absolute top-0 z-10 mb-1 grid w-full grid-cols-2 items-center bg-surface-50-950 px-4 py-2 sm:grid-cols-3"
+		>
+			<LogoLink />
+			<a
+				href={resolve(`/compose?${$page.url.searchParams.toString()}`)}
+				class="hidden justify-center sm:flex"
+			>
+				Back to Composer
+			</a>
+			<div class="flex justify-end">=</div>
+		</header>
+		<div class="absolute bottom-0 z-10 flex w-full justify-between gap-2 bg-surface-50-950 p-2">
+			<div class="flex gap-2">
+				<button onclick={() => step()}>Step</button>
+				<button onclick={toggleRun}>{running ? "Pause" : "Run"}</button>
+			</div>
+			<div>
+				<span>{squareCount} pieces</span>
+			</div>
 		</div>
 	{/if}
 </div>
-
-<style>
-	.container {
-		@apply relative h-screen w-screen overflow-hidden;
-	}
-	canvas {
-		@apply block h-full w-full;
-	}
-	.controls {
-		@apply absolute bottom-1 left-1/2 flex translate-x-1/2 gap-2;
-	}
-</style>

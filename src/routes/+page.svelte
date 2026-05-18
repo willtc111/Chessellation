@@ -3,10 +3,59 @@
 	import LogoLink from "$lib/components/LogoLink.svelte";
 </script>
 
+<svelte:head>
+	<title>Chessellation</title>
+</svelte:head>
+
 <header class="mb-1 grid grid-cols-2 items-center bg-surface-50-950 px-4 py-2">
 	<LogoLink />
 
 	<div class="flex justify-end">=</div>
 </header>
 
-<a href={resolve("/compose")} class="btn preset-filled"> Compose a Chessellation </a>
+<main class="mx-auto my-2 flex max-w-160 flex-col items-center justify-center gap-2">
+	<div>
+		Create teams of chess pieces that compete for safe territory on an infinite chess board, forming
+		elaborate and unpredictable patterns.
+	</div>
+
+	<div>
+		Assemble teams in the composition editor, assigning each team a color and specifying the pieces.
+		Then run the composition to see what pattern it creates.
+	</div>
+
+	<a href={resolve("/compose")} class="my-2 btn preset-filled">Compose a Chessellation</a>
+
+	<div>Inspired by the following Numberphile videos:</div>
+
+	<div class="flex flex-col gap-2">
+		<iframe
+			width="560"
+			height="315"
+			src="https://www.youtube.com/embed/UiX4CFIiegM?si=lyrS6xRdEj_P00cW"
+			title="YouTube video player"
+			frameborder="0"
+			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+			referrerpolicy="strict-origin-when-cross-origin"
+			allowfullscreen
+		></iframe>
+		<iframe
+			width="560"
+			height="315"
+			src="https://www.youtube.com/embed/VgmDuBCayPw?si=3KRtw4krRntR_Z4x"
+			title="YouTube video player"
+			frameborder="0"
+			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+			referrerpolicy="strict-origin-when-cross-origin"
+			allowfullscreen
+		></iframe>
+	</div>
+
+	<div>
+		Chessellation expands on this idea by allowing for any arbitrary piece move patterns within a
+		9x9 area and teams of multiple different pieces. Each team plays one piece per turn. For teams
+		wtih multiple pieces, the team cycles through its roster to decide which piece to use.
+	</div>
+
+	<div>Let me know if you find any particularly interesting patterns!</div>
+</main>
