@@ -20,6 +20,11 @@
 	let app: Application;
 	let world: Container;
 
+	// Panning
+	let dragging = false;
+	let dragStart = { x: 0, y: 0 };
+	let stageStart = { x: 0, y: 0 };
+
 	// Visual settings
 	const CELL_SIZE = 10;
 	const TEAM_COLORS: Record<number, number> = {};
@@ -52,9 +57,6 @@
 		app.stage.addChild(world);
 
 		// Enable panning
-		let dragging = false;
-		let dragStart = { x: 0, y: 0 };
-		let stageStart = { x: 0, y: 0 };
 
 		app.stage.eventMode = "static";
 		app.stage.hitArea = app.screen;
@@ -75,23 +77,7 @@
 		// Zoom with scroll wheel
 		canvas.addEventListener("wheel", (e) => {
 			e.preventDefault();
-			const scale = e.deltaY < 0 ? 1.1 : 0.9;
-
-			// Center of the screen in world space
-			const cx = (app.screen.width / 2 - world.x) / world.scale.x;
-			const cy = (app.screen.height / 2 - world.y) / world.scale.y;
-
-			world.scale.x *= scale;
-			world.scale.y *= scale;
-
-			// Adjust position so the center point stays fixed
-			world.x = app.screen.width / 2 - cx * world.scale.x;
-			world.y = app.screen.height / 2 - cy * world.scale.y;
-
-			if (dragging) {
-				stageStart = { x: world.x, y: world.y };
-				dragStart = { x: e.clientX, y: e.clientY };
-			}
+			zoom(e.deltaY < 0 ? 1.1 : 0.9, e.clientX, e.clientY);
 		});
 
 		// Center the origin and flip the Y axis
@@ -116,6 +102,24 @@
 		if (rafId) cancelAnimationFrame(rafId);
 		app?.destroy();
 	});
+
+	function zoom(scale: number, x: number, y: number) {
+		// Center of the screen in world space
+		const cx = (app.screen.width / 2 - world.x) / world.scale.x;
+		const cy = (app.screen.height / 2 - world.y) / world.scale.y;
+
+		world.scale.x *= scale;
+		world.scale.y *= scale;
+
+		// Adjust position so the center point stays fixed
+		world.x = app.screen.width / 2 - cx * world.scale.x;
+		world.y = app.screen.height / 2 - cy * world.scale.y;
+
+		if (dragging) {
+			stageStart = { x: world.x, y: world.y };
+			dragStart = { x: x, y: y };
+		}
+	}
 
 	function renderChanges(changes: Int32Array) {
 		const g = new Graphics();
@@ -178,9 +182,24 @@
 				<button onclick={() => step()}>Step</button>
 				<button onclick={toggleRun}>{running ? "Pause" : "Run"}</button>
 			</div>
+			<div class="flex justify-center gap-2">
+				<button class="zoomBtn" onclick={() => zoom(0.9, 0, 0)}> - </button>
+				<span>Zoom</span>
+				<button class="zoomBtn" onclick={() => zoom(1.1, 0, 0)}> + </button>
+			</div>
 			<div>
-				<span>{squareCount} pieces</span>
+				<span
+					>{squareCount}
+					<span class="inline sm:hidden">pcs</span>
+					<span class="hidden sm:inline">pieces</span>
+				</span>
 			</div>
 		</div>
 	{/if}
 </div>
+
+<style>
+	.zoomBtn {
+		@apply btn h-8 w-8 preset-filled-surface-400-600 text-lg font-bold;
+	}
+</style>
