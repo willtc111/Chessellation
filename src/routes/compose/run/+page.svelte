@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { convertToInputs } from "$lib/input.js";
-	import { Chessellator } from "$lib/wasm/chessellation";
+	import type { Chessellator } from "$lib/wasm/chessellation";
 	import { onMount, onDestroy } from "svelte";
 	import { Application, Container, Graphics } from "pixi.js";
 	import type { Team } from "$lib/teams";
@@ -92,7 +92,8 @@
 		}
 
 		try {
-			chessellator = Chessellator.new(JSON.stringify(convertToInputs(data.teams)));
+			const wasm = await import("$lib/wasm/chessellation");
+			chessellator = wasm.Chessellator.new(JSON.stringify(convertToInputs(data.teams)));
 		} catch (e) {
 			error = `Failed to initialize: ${e}`;
 		}
