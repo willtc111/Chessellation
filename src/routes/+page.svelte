@@ -52,9 +52,9 @@
 	</div>
 
 	<div>
-		Chessellation expands on this idea by allowing for any arbitrary piece move patterns within a
-		9x9 area and teams of multiple different pieces. Each team plays one piece per turn. For teams
-		wtih multiple pieces, the team cycles through its roster to decide which piece to use.
+		Chessellation expands on this idea by allowing for any piece move patterns within a 9x9 area and
+		teams of multiple different pieces. Each team plays one piece per turn. For teams with multiple
+		pieces, the team cycles through its roster to decide which piece to use.
 	</div>
 
 	<div>Let me know if you find any particularly interesting patterns!</div>
