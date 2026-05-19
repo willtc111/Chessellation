@@ -51,7 +51,7 @@
 				<h3>Pieces</h3>
 				<span>{team.pieces.length} / 8</span>
 				<button
-					class="btn preset-filled"
+					class="btn preset-filled-surface-400-600"
 					title="Add piece to team"
 					onclick={(e) => addMember(e)}
 					disabled={team.pieces.length >= 8}

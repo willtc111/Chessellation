@@ -40,7 +40,7 @@
 			</select>
 		</div>
 
-		<button class="btn preset-filled-primary-500" onclick={resetKernel} title="Clear kernel">
+		<button class="btn preset-filled-surface-400-600" onclick={resetKernel} title="Clear kernel">
 			Clear
 		</button>
 	</div>

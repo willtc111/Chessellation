@@ -4,3 +4,7 @@
 @import "../styles/custom-theme.css";
 
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+
+.navLink {
+	@apply text-lg;
+}

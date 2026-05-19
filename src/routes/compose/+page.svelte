@@ -1,6 +1,5 @@
 <script lang="ts">
 	import ComposeEditor from "$lib/components/editors/ComposeEditor.svelte";
-	import LogoLink from "$lib/components/LogoLink.svelte";
 	import type { Team } from "$lib/teams";
 	import { goto } from "$app/navigation";
 	import { convertToInputs, encodeInputs } from "$lib/input";
@@ -8,6 +7,7 @@
 	import { onMount } from "svelte";
 	import { fade } from "svelte/transition";
 	import Copyable from "$lib/components/Copyable.svelte";
+	import NavBar from "$lib/components/NavBar.svelte";
 
 	let { data } = $props();
 	// svelte-ignore state_referenced_locally
@@ -24,7 +24,7 @@
 	});
 
 	function run() {
-		goto(resolve(`/run?v=1&t=${encoded}`));
+		goto(resolve(`/compose/run?v=1&t=${encoded}`));
 	}
 
 	let loading = $state(true);
@@ -37,22 +37,14 @@
 	<title>Compose Chessellation</title>
 </svelte:head>
 
-<header
-	class="sticky top-0 z-10 mb-1 grid grid-cols-2 items-center bg-surface-50-950 px-4 py-2 sm:grid-cols-3"
->
-	<LogoLink />
-	<h1 class="hidden justify-center sm:flex">Compose</h1>
-	<div class="flex justify-end">=</div>
-</header>
+<NavBar pageName="Compose">
+	<a href={resolve("/compose")} class="navLink"> Composer </a>
+</NavBar>
 
 {#if !loading}
 	<main class="m-2 flex flex-col gap-2" in:fade>
-		<div class="flex gap-2">
-			<button
-				class="btn min-w-fit preset-filled-primary-500"
-				disabled={teams.length == 0}
-				onclick={run}
-			>
+		<div class="flex flex-col gap-2 sm:flex-row">
+			<button class="btn w-50 preset-filled-primary-500" disabled={teams.length == 0} onclick={run}>
 				Run Chessellation
 			</button>
 			<Copyable
@@ -60,15 +52,10 @@
 				value={shareUrl}
 				shownValue="Share Composition"
 				copyMessage="Copied Link"
+				disabled={teams.length == 0}
 			/>
 		</div>
 
 		<ComposeEditor bind:teams />
 	</main>
 {/if}
-
-<style>
-	h1 {
-		@apply text-2xl;
-	}
-</style>

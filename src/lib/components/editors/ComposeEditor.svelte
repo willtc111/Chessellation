@@ -4,8 +4,20 @@
 
 	let { teams = $bindable() } = $props();
 
+	const MAX_HEX = 16777215; // 2^24-1
+
+	function randomColor() {
+		const hex = Math.floor(Math.random() * MAX_HEX)
+			.toString(16)
+			.padStart(6, "0");
+		return `#${hex}`;
+	}
+
 	function addTeam() {
-		teams.push({ pieces: [DEFAULT_MEMBER] });
+		teams.push({
+			color: randomColor(),
+			pieces: [DEFAULT_MEMBER],
+		});
 	}
 
 	function removeTeam(iTeam: number) {
@@ -18,7 +30,7 @@
 		<h2>Teams</h2>
 		<span>{teams.length} / 32</span>
 		<button
-			class="btn preset-filled"
+			class="btn preset-filled-surface-400-600"
 			onclick={addTeam}
 			disabled={teams.length >= 32}
 			title="Add team"

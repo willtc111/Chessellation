@@ -2,11 +2,11 @@
 	import { convertToInputs } from "$lib/input.js";
 	import { Chessellator } from "$lib/wasm/chessellation";
 	import { onMount, onDestroy } from "svelte";
-	import { Application, Graphics } from "pixi.js";
+	import { Application, Container, Graphics } from "pixi.js";
 	import type { Team } from "$lib/teams";
-	import LogoLink from "$lib/components/LogoLink.svelte";
 	import { resolve } from "$app/paths";
 	import { page } from "$app/stores";
+	import NavBar from "$lib/components/NavBar.svelte";
 
 	let { data }: { data: { teams: Team[]; error: string } } = $props();
 
@@ -18,6 +18,7 @@
 
 	let canvas: HTMLCanvasElement;
 	let app: Application;
+	let world: Container;
 
 	// Visual settings
 	const CELL_SIZE = 10;
@@ -47,6 +48,9 @@
 			antialias: false,
 		});
 
+		world = new Container();
+		app.stage.addChild(world);
+
 		// Enable panning
 		let dragging = false;
 		let dragStart = { x: 0, y: 0 };
@@ -58,12 +62,12 @@
 		app.stage.on("pointerdown", (e) => {
 			dragging = true;
 			dragStart = { x: e.clientX, y: e.clientY };
-			stageStart = { x: app.stage.x, y: app.stage.y };
+			stageStart = { x: world.x, y: world.y };
 		});
 		app.stage.on("pointermove", (e) => {
 			if (!dragging) return;
-			app.stage.x = stageStart.x + (e.clientX - dragStart.x);
-			app.stage.y = stageStart.y + (e.clientY - dragStart.y);
+			world.x = stageStart.x + (e.clientX - dragStart.x);
+			world.y = stageStart.y + (e.clientY - dragStart.y);
 		});
 		app.stage.on("pointerup", () => (dragging = false));
 		app.stage.on("pointerupoutside", () => (dragging = false));
@@ -72,14 +76,28 @@
 		canvas.addEventListener("wheel", (e) => {
 			e.preventDefault();
 			const scale = e.deltaY < 0 ? 1.1 : 0.9;
-			app.stage.scale.x *= scale;
-			app.stage.scale.y *= scale;
+
+			// Center of the screen in world space
+			const cx = (app.screen.width / 2 - world.x) / world.scale.x;
+			const cy = (app.screen.height / 2 - world.y) / world.scale.y;
+
+			world.scale.x *= scale;
+			world.scale.y *= scale;
+
+			// Adjust position so the center point stays fixed
+			world.x = app.screen.width / 2 - cx * world.scale.x;
+			world.y = app.screen.height / 2 - cy * world.scale.y;
+
+			if (dragging) {
+				stageStart = { x: world.x, y: world.y };
+				dragStart = { x: e.clientX, y: e.clientY };
+			}
 		});
 
 		// Center the origin and flip the Y axis
-		app.stage.x = app.screen.width / 2;
-		app.stage.y = app.screen.height / 2;
-		app.stage.scale.y = -1;
+		world.x = app.screen.width / 2;
+		world.y = app.screen.height / 2;
+		world.scale.y = -1;
 
 		// Initialize chessellator
 		if (!data.teams) {
@@ -108,7 +126,7 @@
 			g.rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE).fill(getTeamColor(team));
 			squareCount += 1;
 		}
-		app.stage.addChild(g);
+		world.addChild(g);
 	}
 
 	function step(count: number = 1) {
@@ -144,18 +162,17 @@
 	{#if error}
 		<p>{error}</p>
 	{:else if chessellator}
-		<header
-			class="absolute top-0 z-10 mb-1 grid w-full grid-cols-2 items-center bg-surface-50-950 px-4 py-2 sm:grid-cols-3"
-		>
-			<LogoLink />
-			<a
-				href={resolve(`/compose?${$page.url.searchParams.toString()}`)}
-				class="hidden justify-center sm:flex"
-			>
-				Back to Composer
-			</a>
-			<div class="flex justify-end">=</div>
+		<header class="absolute top-0 z-10 w-full">
+			<NavBar pageName="Run">
+				{#snippet headerLinks()}
+					<a href={resolve(`/compose?${$page.url.searchParams.toString()}`)}> Back to Composer </a>
+				{/snippet}
+				<a href={resolve(`/compose?${$page.url.searchParams.toString()}`)} class="navLink">
+					Composer
+				</a>
+			</NavBar>
 		</header>
+
 		<div class="absolute bottom-0 z-10 flex w-full justify-between gap-2 bg-surface-50-950 p-2">
 			<div class="flex gap-2">
 				<button onclick={() => step()}>Step</button>

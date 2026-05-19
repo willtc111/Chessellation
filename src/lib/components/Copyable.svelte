@@ -1,5 +1,11 @@
 <script lang="ts">
-	let { value, shownValue = value, copyMessage = "Copied", class: className = "" } = $props();
+	let {
+		value,
+		shownValue = value,
+		copyMessage = "Copied",
+		class: className = "",
+		disabled,
+	} = $props();
 
 	let copied: boolean = $state(false);
 	async function copyToClipboard() {
@@ -16,6 +22,6 @@
 	}
 </script>
 
-<button class={className} onclick={copyToClipboard}>
+<button class={className} onclick={copyToClipboard} {disabled}>
 	{copied ? copyMessage : String(shownValue)}
 </button>

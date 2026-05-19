@@ -1,17 +1,15 @@
 <script lang="ts">
 	import { resolve } from "$app/paths";
-	import LogoLink from "$lib/components/LogoLink.svelte";
+	import NavBar from "$lib/components/NavBar.svelte";
 </script>
 
 <svelte:head>
 	<title>Chessellation</title>
 </svelte:head>
 
-<header class="mb-1 grid grid-cols-2 items-center bg-surface-50-950 px-4 py-2">
-	<LogoLink />
-
-	<div class="flex justify-end">=</div>
-</header>
+<NavBar pageName="Home">
+	<a href={resolve("/compose")} class="navLink"> Composer </a>
+</NavBar>
 
 <main class="mx-auto my-2 flex max-w-160 flex-col items-center justify-center gap-2">
 	<div>
@@ -24,7 +22,9 @@
 		Then run the composition to see what pattern it creates.
 	</div>
 
-	<a href={resolve("/compose")} class="my-2 btn preset-filled">Compose a Chessellation</a>
+	<a href={resolve("/compose")} class="my-2 btn preset-filled-surface-400-600"
+		>Compose a Chessellation</a
+	>
 
 	<div>Inspired by the following Numberphile videos:</div>
 
