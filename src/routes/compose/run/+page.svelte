@@ -178,17 +178,19 @@
 			</NavBar>
 		</header>
 
-		<footer class="absolute bottom-0 z-10 flex w-full justify-between gap-2 bg-surface-50-950 p-2">
+		<footer class="absolute bottom-0 z-10 flex flex-wrap w-full justify-between gap-2 bg-surface-50-950 p-2 select-none">
 			<div class="flex gap-2">
-				<button onclick={() => step()}>Step</button>
-				<button onclick={toggleRun}>{running ? "Pause" : "Run"}</button>
+				<button class="playBtn" onclick={() => step()}>Step</button>
+				<button class="playBtn" onclick={toggleRun}>{running ? "Stop" : "Run"}</button>
 			</div>
+
 			<div class="flex justify-center gap-2">
 				<button class="zoomBtn" onclick={() => zoom(0.9, 0, 0)}> - </button>
 				<span>Zoom</span>
 				<button class="zoomBtn" onclick={() => zoom(1.1, 0, 0)}> + </button>
 			</div>
-			<div>
+
+			<div class="grow sm:grow-0 text-right">
 				<span
 					>{squareCount}
 					<span class="inline sm:hidden">pcs</span>
@@ -200,6 +202,9 @@
 </div>
 
 <style>
+	.playBtn {
+		@apply btn w-12 sm:w-16 h-8 preset-filled-surface-400-600 text-sm font-bold;
+	}
 	.zoomBtn {
 		@apply btn h-8 w-8 preset-filled-surface-400-600 text-lg font-bold;
 	}
