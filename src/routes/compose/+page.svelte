@@ -20,7 +20,12 @@
 		const url = new URL(window.location.href);
 		url.searchParams.set("v", "1");
 		url.searchParams.set("t", encoded);
-		history.replaceState({}, "", url);
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		goto(url, {
+        replaceState: true,
+        noScroll: true,
+        keepFocus: true
+    });
 	});
 
 	function run() {
