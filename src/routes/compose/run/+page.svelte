@@ -162,7 +162,7 @@
 	<title>Run Chessellation</title>
 </svelte:head>
 
-<div class="relative h-screen w-screen overflow-hidden">
+<div class="relative h-dvh w-screen overflow-hidden pb-[env(safe-area-inset-bottom)]">
 	<canvas bind:this={canvas} class="block h-full w-full"></canvas>
 	{#if error}
 		<p>{error}</p>
@@ -178,7 +178,7 @@
 			</NavBar>
 		</header>
 
-		<div class="absolute bottom-0 z-10 flex w-full justify-between gap-2 bg-surface-50-950 p-2">
+		<footer class="absolute bottom-0 z-10 flex w-full justify-between gap-2 bg-surface-50-950 p-2">
 			<div class="flex gap-2">
 				<button onclick={() => step()}>Step</button>
 				<button onclick={toggleRun}>{running ? "Pause" : "Run"}</button>
@@ -195,7 +195,7 @@
 					<span class="hidden sm:inline">pieces</span>
 				</span>
 			</div>
-		</div>
+		</footer>
 	{/if}
 </div>
 
