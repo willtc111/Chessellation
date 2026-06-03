@@ -345,4 +345,10 @@ export const PRESET_OFFSETS: Preset[] = [
 			[4, 2],
 		],
 	},
+	{
+		name: "Full",
+		offsets: Array.from({ length: KERNEL_SIZE }, (_, r) =>
+			Array.from({ length: KERNEL_SIZE }, (_, c) => [c - Math.floor(KERNEL_SIZE / 2), r - Math.floor(KERNEL_SIZE / 2)] as Offset)
+		).flat(),
+	}
 ];
