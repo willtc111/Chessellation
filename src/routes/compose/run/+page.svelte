@@ -2,11 +2,11 @@
 	import { convertToInputs } from "$lib/input.js";
 	import type { Chessellator } from "$lib/wasm/chessellation";
 	import { onMount, onDestroy } from "svelte";
-	import { Application, Container, Graphics } from "pixi.js";
 	import type { Team } from "$lib/teams";
 	import { resolve } from "$app/paths";
 	import { page } from "$app/stores";
 	import NavBar from "$lib/components/NavBar.svelte";
+	import Visualizer from "$lib/components/Visualizer.svelte";
 
 	let { data }: { data: { teams: Team[]; error: string } } = $props();
 
@@ -15,75 +15,12 @@
 	let running = $state(false);
 	let rafId: number;
 	let squareCount = $state(0);
-
-	let canvas: HTMLCanvasElement;
-	let app: Application;
-	let world: Container;
-
-	// Panning
-	let dragging = false;
-	let dragStart = { x: 0, y: 0 };
-	let stageStart = { x: 0, y: 0 };
-
-	// Visual settings
-	const CELL_SIZE = 10;
-	const TEAM_COLORS: Record<number, number> = {};
-
-	function getTeamColor(teamId: number): number {
-		if (!(teamId in TEAM_COLORS)) {
-			// Pull from the decoded teams data
-			const hex = data.teams[teamId]?.color ?? "#ffffff";
-			TEAM_COLORS[teamId] = parseInt(hex.replace("#", ""), 16);
-		}
-		return TEAM_COLORS[teamId];
-	}
+	let visualizer: Visualizer;
 
 	onMount(async () => {
-		if (!canvas) {
-			console.log(canvas);
+		if (!visualizer) {
 			return;
 		}
-
-		// Set up PixiJS
-		app = new Application();
-		await app.init({
-			canvas,
-			resizeTo: canvas.parentElement!,
-			backgroundColor: 0x111111,
-			antialias: false,
-		});
-
-		world = new Container();
-		app.stage.addChild(world);
-
-		// Enable panning
-
-		app.stage.eventMode = "static";
-		app.stage.hitArea = app.screen;
-
-		app.stage.on("pointerdown", (e) => {
-			dragging = true;
-			dragStart = { x: e.clientX, y: e.clientY };
-			stageStart = { x: world.x, y: world.y };
-		});
-		app.stage.on("pointermove", (e) => {
-			if (!dragging) return;
-			world.x = stageStart.x + (e.clientX - dragStart.x);
-			world.y = stageStart.y + (e.clientY - dragStart.y);
-		});
-		app.stage.on("pointerup", () => (dragging = false));
-		app.stage.on("pointerupoutside", () => (dragging = false));
-
-		// Zoom with scroll wheel
-		canvas.addEventListener("wheel", (e) => {
-			e.preventDefault();
-			zoom(e.deltaY < 0 ? 1.1 : 0.9, e.clientX, e.clientY);
-		});
-
-		// Center the origin and flip the Y axis
-		world.x = app.screen.width / 2;
-		world.y = app.screen.height / 2;
-		world.scale.y = -1;
 
 		// Initialize chessellator
 		if (!data.teams) {
@@ -101,38 +38,7 @@
 
 	onDestroy(() => {
 		if (rafId) cancelAnimationFrame(rafId);
-		app?.destroy();
 	});
-
-	function zoom(scale: number, x: number, y: number) {
-		// Center of the screen in world space
-		const cx = (app.screen.width / 2 - world.x) / world.scale.x;
-		const cy = (app.screen.height / 2 - world.y) / world.scale.y;
-
-		world.scale.x *= scale;
-		world.scale.y *= scale;
-
-		// Adjust position so the center point stays fixed
-		world.x = app.screen.width / 2 - cx * world.scale.x;
-		world.y = app.screen.height / 2 - cy * world.scale.y;
-
-		if (dragging) {
-			stageStart = { x: world.x, y: world.y };
-			dragStart = { x: x, y: y };
-		}
-	}
-
-	function renderChanges(changes: Int32Array) {
-		const g = new Graphics();
-		for (let i = 0; i < changes.length; i += 3) {
-			const x = changes[i];
-			const y = changes[i + 1];
-			const team = changes[i + 2];
-			g.rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE).fill(getTeamColor(team));
-			squareCount += 1;
-		}
-		world.addChild(g);
-	}
 
 	function step(count: number = 1) {
 		if (!chessellator) return;
@@ -140,7 +46,7 @@
 			chessellator.step();
 		}
 		const changes = chessellator.flush_changes();
-		renderChanges(changes);
+		visualizer.renderChanges(changes);
 	}
 
 	function animate() {
@@ -163,7 +69,7 @@
 </svelte:head>
 
 <div class="relative h-dvh w-screen overflow-hidden pb-[env(safe-area-inset-bottom)]">
-	<canvas bind:this={canvas} class="block h-full w-full"></canvas>
+	<Visualizer {data} bind:this={visualizer} bind:squareCount={squareCount} />
 	{#if error}
 		<p>{error}</p>
 	{:else if chessellator}
@@ -185,9 +91,9 @@
 			</div>
 
 			<div class="flex justify-center gap-2">
-				<button class="zoomBtn" onclick={() => zoom(0.9, 0, 0)}> - </button>
+				<button class="zoomBtn" onclick={() => visualizer.zoom(0.9, 0, 0)}> - </button>
 				<span>Zoom</span>
-				<button class="zoomBtn" onclick={() => zoom(1.1, 0, 0)}> + </button>
+				<button class="zoomBtn" onclick={() => visualizer.zoom(1.1, 0, 0)}> + </button>
 			</div>
 
 			<div class="grow sm:grow-0 text-right">
