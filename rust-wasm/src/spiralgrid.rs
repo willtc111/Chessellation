@@ -10,19 +10,7 @@ pub fn index_to_xy(i: usize) -> (i32, i32) {
         return (0, 0);
     }
 
-    // Find shell n such that (2n-1)^2 <= i < (2n+1)^2
-    let n = ((i as f64).sqrt() / 2.0 + 0.5) as i32;
-    let n = {
-        let mut n = n;
-        while (2 * n + 1).pow(2) as usize <= i {
-            n += 1;
-        }
-        while n > 0 && (2 * n - 1).pow(2) as usize > i {
-            n -= 1;
-        }
-        n
-    };
-
+    let n = index_to_ring(i);
     let shell_start = (2 * n - 1).pow(2) as usize;
     let offset = (i - shell_start) as i32;
     let side_len = 2 * n;
@@ -44,7 +32,7 @@ pub fn xy_to_index(x: i32, y: i32) -> usize {
         return 0;
     }
 
-    let n = x.abs().max(y.abs());
+    let n = xy_to_ring(x, y);
     let shell_start = (2 * n - 1).pow(2) as usize;
     let side_len = 2 * n;
 
@@ -64,7 +52,7 @@ pub fn xy_to_index(x: i32, y: i32) -> usize {
 /// Given a coordinate (x,y), returns the next coordinate in the spiral order.
 pub fn next_xy(x: i32, y: i32) -> (i32, i32) {
     // Determine shell and whether we need to turn
-    let n = x.abs().max(y.abs());
+    let n = xy_to_ring(x, y);
 
     // Turn conditions (CCW: right -> up -> left -> down)
     if x == n && y < n && (x != -y || x < 0) {
@@ -78,6 +66,30 @@ pub fn next_xy(x: i32, y: i32) -> (i32, i32) {
     }
 }
 
+pub fn xy_to_ring(x: i32, y: i32) -> i32 {
+    x.abs().max(y.abs())
+}
+
+pub fn index_to_ring(i: usize) -> i32 {
+    if i == 0 {
+        return 0;
+    }
+
+    // Find shell n such that (2n-1)^2 <= i < (2n+1)^2
+    let n = ((i as f64).sqrt() / 2.0 + 0.5) as i32;
+    let n = {
+        let mut n = n;
+        while (2 * n + 1).pow(2) as usize <= i {
+            n += 1;
+        }
+        while n > 0 && (2 * n - 1).pow(2) as usize > i {
+            n -= 1;
+        }
+        n
+    };
+    n
+}
+
 #[derive(Clone, Copy, Debug, Default)]
 struct Cell {
     pub occupant: Option<TeamId>,
@@ -85,31 +97,50 @@ struct Cell {
 }
 
 pub struct SpiralGrid {
-    grid: HashMap<(i32, i32), Cell>,
+    /// Grid ring to (x,y) to cell data.
+    rings: HashMap<i32, HashMap<(i32,i32), Cell>>,
+    last_rings: HashMap<TeamId, i32>,
 }
 impl SpiralGrid {
     pub fn new() -> Self {
         Self {
-            grid: HashMap::new(),
+            rings: HashMap::new(),
+            last_rings: HashMap::new(),
         }
     }
 
     pub fn is_allowed(&self, x: i32, y: i32, team: TeamId) -> bool {
-        self.grid.get(&(x, y)).map_or(true, |cell| {
-            cell.occupant.is_none() && cell.visibility.is_safe(team)
-        })
+        let cell = self.get(x, y);
+        cell.occupant.is_none() && cell.visibility.is_safe(team)
+    }
+
+    fn get(&self, x: i32, y: i32) -> Cell {
+        let ring = xy_to_ring(x, y);
+        self.rings.get(&ring).and_then(|r| r.get(&(x, y))).unwrap_or(&Cell::default()).clone()
+    }
+
+    fn get_mut(&mut  self, x: i32, y: i32) -> &mut Cell {
+        let ring = xy_to_ring(x, y);
+        self.rings.entry(ring).or_default().entry((x, y)).or_default()
     }
 
     pub fn set(&mut self, x: i32, y: i32, team: TeamId, kernel: &Kernel) {
         // Place the piece
-        let cell = self.grid.entry((x, y)).or_default();
+        let cell = self.get_mut(x, y);
         cell.occupant = Some(team);
 
         // Apply the kernel to mark visibility
         for &(dx, dy) in kernel.offsets() {
             let target = (x + dx, y + dy);
-            self.grid.entry(target).or_default().visibility.add(team);
+            self.get_mut(target.0, target.1).visibility.add(team);
         }
+
+        // Update last ring for this team
+        self.last_rings.insert(team, xy_to_ring(x, y) as i32);
+
+        // Check if any rings in the center of the grid can be pruned
+        let min_ring = self.last_rings.values().min().unwrap_or(&0) - 4;
+        self.rings.retain(|&ring, _| ring >= min_ring);
     }
 }
 
@@ -228,7 +259,7 @@ mod tests {
         grid.set(0, 0, team, &kernel);
         // All knight-move targets should now be visible to team
         for &(dx, dy) in kernel.offsets() {
-            let cell = grid.grid.get(&(dx, dy)).expect("kernel cell should exist");
+            let cell = grid.get(dx, dy);
             assert!(
                 cell.visibility.can_see(team),
                 "({dx},{dy}) should be visible to team after set"
@@ -282,5 +313,34 @@ mod tests {
         grid.set(1, 2, t2, &kernel);
         assert!(!grid.is_allowed(1, 2, t1));
         assert!(!grid.is_allowed(1, 2, t2));
+    }
+
+    #[test]
+    fn ring_pruning() {
+        let mut grid = SpiralGrid::new();
+        let team_a = TeamId::new(0).unwrap();
+        let team_b = TeamId::new(1).unwrap();
+        let kernel = Kernel::knight();
+
+        // Place pieces in lines to populate the grid
+        let line_length = 10;
+        for i in 0..=line_length {
+            grid.set(i, 0, team_a, &kernel);
+            grid.set(0, i, team_b, &kernel);
+        }
+        grid.set(line_length + 1, 0, team_a, &kernel);
+
+        // last_rings are correct for each team
+        assert_eq!(grid.last_rings[&team_a], line_length + 1);
+        assert_eq!(grid.last_rings[&team_b], line_length);
+
+        // Inner irrelevant rings are pruned
+        for x in 0..line_length-4 {
+            assert!(!grid.rings.contains_key(&x));
+        }
+        // Rings near the fronteir still exist
+        for x in line_length-4..=line_length + 1 {
+            assert!(grid.rings.contains_key(&x));
+        }
     }
 }

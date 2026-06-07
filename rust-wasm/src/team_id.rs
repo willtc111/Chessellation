@@ -2,7 +2,7 @@ use std::num::NonZeroU8;
 
 /// A TeamId number in the range 0..32, represented as a NonZero u8 internally
 /// so that Option<TeamId> is still only 1 byte (None = 0, Some(t) = 1..=32)
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct TeamId(NonZeroU8);
 
 impl TeamId {
