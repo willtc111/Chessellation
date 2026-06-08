@@ -26,7 +26,7 @@
 		>Compose a Chessellation</a
 	>
 
-	<div>Inspired by the following Numberphile videos:</div>
+	<div>Inspired by and based on the concept outlined in the following Numberphile videos:</div>
 
 	<div class="flex flex-col gap-2">
 		<iframe
@@ -52,9 +52,9 @@
 	</div>
 
 	<div>
-		Chessellation expands on this idea by allowing for any piece move patterns within a 9x9 area and
-		teams of multiple different pieces. Each team plays one piece per turn. For teams with multiple
-		pieces, the team cycles through its roster to decide which piece to use.
+		Chessellation expands on this idea by allowing pieces to have any move pattern within a 9x9
+		area, as well as teams of multiple different pieces. Each team plays one piece per turn. For
+		teams with multiple pieces, the team cycles through its roster in order.
 	</div>
 
 	<div>Let me know if you find any particularly interesting patterns!</div>

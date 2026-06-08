@@ -3,7 +3,8 @@
 	import { Application, Container, Graphics } from "pixi.js";
 	import type { Team } from "$lib/teams";
 
-	let { data, squareCount = $bindable(0) }: { data: { teams: Team[] }; squareCount: number; } = $props();
+	let { data, squareCount = $bindable(0) }: { data: { teams: Team[] }; squareCount: number } =
+		$props();
 
 	let canvas: HTMLCanvasElement;
 	let app: Application;

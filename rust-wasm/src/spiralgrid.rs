@@ -98,7 +98,7 @@ struct Cell {
 
 pub struct SpiralGrid {
     /// Grid ring to (x,y) to cell data.
-    rings: HashMap<i32, HashMap<(i32,i32), Cell>>,
+    rings: HashMap<i32, HashMap<(i32, i32), Cell>>,
     last_rings: HashMap<TeamId, i32>,
 }
 impl SpiralGrid {
@@ -116,12 +116,20 @@ impl SpiralGrid {
 
     fn get(&self, x: i32, y: i32) -> Cell {
         let ring = xy_to_ring(x, y);
-        self.rings.get(&ring).and_then(|r| r.get(&(x, y))).unwrap_or(&Cell::default()).clone()
+        self.rings
+            .get(&ring)
+            .and_then(|r| r.get(&(x, y)))
+            .unwrap_or(&Cell::default())
+            .clone()
     }
 
-    fn get_mut(&mut  self, x: i32, y: i32) -> &mut Cell {
+    fn get_mut(&mut self, x: i32, y: i32) -> &mut Cell {
         let ring = xy_to_ring(x, y);
-        self.rings.entry(ring).or_default().entry((x, y)).or_default()
+        self.rings
+            .entry(ring)
+            .or_default()
+            .entry((x, y))
+            .or_default()
     }
 
     pub fn set(&mut self, x: i32, y: i32, team: TeamId, kernel: &Kernel) {
@@ -335,11 +343,11 @@ mod tests {
         assert_eq!(grid.last_rings[&team_b], line_length);
 
         // Inner irrelevant rings are pruned
-        for x in 0..line_length-4 {
+        for x in 0..line_length - 4 {
             assert!(!grid.rings.contains_key(&x));
         }
         // Rings near the fronteir still exist
-        for x in line_length-4..=line_length + 1 {
+        for x in line_length - 4..=line_length + 1 {
             assert!(grid.rings.contains_key(&x));
         }
     }

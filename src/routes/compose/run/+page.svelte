@@ -69,7 +69,7 @@
 </svelte:head>
 
 <div class="relative h-dvh w-screen overflow-hidden pb-[env(safe-area-inset-bottom)]">
-	<Visualizer {data} bind:this={visualizer} bind:squareCount={squareCount} />
+	<Visualizer {data} bind:this={visualizer} bind:squareCount />
 	{#if error}
 		<p>{error}</p>
 	{:else if chessellator}
@@ -84,7 +84,9 @@
 			</NavBar>
 		</header>
 
-		<footer class="absolute bottom-0 z-10 flex flex-wrap w-full justify-between gap-2 bg-surface-50-950 p-2 select-none">
+		<footer
+			class="absolute bottom-0 z-10 flex w-full flex-wrap justify-between gap-2 bg-surface-50-950 p-2 select-none"
+		>
 			<div class="flex gap-2">
 				<button class="playBtn" onclick={() => step()}>Step</button>
 				<button class="playBtn" onclick={toggleRun}>{running ? "Stop" : "Run"}</button>
@@ -96,7 +98,7 @@
 				<button class="zoomBtn" onclick={() => visualizer.zoom(1.1, 0, 0)}> + </button>
 			</div>
 
-			<div class="grow sm:grow-0 text-right">
+			<div class="grow text-right sm:grow-0">
 				<span
 					>{squareCount}
 					<span class="inline sm:hidden">pcs</span>
@@ -109,7 +111,7 @@
 
 <style>
 	.playBtn {
-		@apply btn w-12 sm:w-16 h-8 preset-filled-surface-400-600 text-sm font-bold;
+		@apply btn h-8 w-12 preset-filled-surface-400-600 text-sm font-bold sm:w-16;
 	}
 	.zoomBtn {
 		@apply btn h-8 w-8 preset-filled-surface-400-600 text-lg font-bold;
