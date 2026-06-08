@@ -54,7 +54,9 @@
 	<div>
 		Chessellation expands on this idea by allowing pieces to have any move pattern within a 9x9
 		area, as well as teams of multiple different pieces. Each team plays one piece per turn. For
-		teams with multiple pieces, the team cycles through its roster in order.
+		teams with multiple pieces, the team cycles through its roster in order. Due to the possibility
+		of asymmetric move patterns, it is important to note that square safety is only determined by
+		whether any existing piece from a different team can see the new piece's square.
 	</div>
 
 	<div>Let me know if you find any particularly interesting patterns!</div>
