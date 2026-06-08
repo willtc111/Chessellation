@@ -7,19 +7,25 @@
 		texture: RenderTexture;
 		sprite: Sprite;
 	};
+
 	type ChunkUpdates = {
 		cx: number;
 		cy: number;
 		cells: {
 			lx: number;
 			ly: number;
-			team: number
-		}[]
+			team: number;
+		}[];
 	};
 
+	type Props = {
+		data: {
+			teams: Team[];
+		},
+		squareCount: number;
+	}
 
-	let { data, squareCount = $bindable(0) }: { data: { teams: Team[] }; squareCount: number } =
-		$props();
+	let { data, squareCount = $bindable(0) }: Props = $props();
 
 	let canvas: HTMLCanvasElement;
 	let app: Application;
@@ -30,48 +36,63 @@
 	let dragStart = { x: 0, y: 0 };
 	let stageStart = { x: 0, y: 0 };
 
-	// Visual settings
-	const CELL_SIZE = 1;
+	// Rendering
 	const TEAM_COLORS: Record<number, number> = {};
-
 	const CHUNK_SIZE = 64; // Cells per chunk
 	const chunks = new Map<string, Chunk>();
 	const lastChunkRings = new Map<number, number>();
 	const tempGraphics = new Graphics();
 
+	/**
+	 * Get the key for a chunk based on its coordinates
+	 * @param cx Chunk X coordinate
+	 * @param cy Chunk Y coordinate
+	 */
 	function getChunkKey(cx: number, cy: number) {
 		return `${cx},${cy}`;
 	}
 
+	/**
+	 * Get a chunk by coordinates, creating it if it doesn't exist
+	 * @param cx Chunk X coordinate
+	 * @param cy Chunk Y coordinate
+	 */
 	function getOrCreateChunk(cx: number, cy: number) {
 		const key = getChunkKey(cx, cy);
 		if (!chunks.has(key)) {
 			const texture = RenderTexture.create({
-				width: CHUNK_SIZE * CELL_SIZE,
-				height: CHUNK_SIZE * CELL_SIZE,
+				width: CHUNK_SIZE,
+				height: CHUNK_SIZE,
 				scaleMode: "nearest",
 			});
 			const sprite = new Sprite(texture);
-			sprite.x = cx * CHUNK_SIZE * CELL_SIZE;
-			sprite.y = cy * CHUNK_SIZE * CELL_SIZE;
+			sprite.x = cx * CHUNK_SIZE;
+			sprite.y = cy * CHUNK_SIZE;
 			world.addChild(sprite);
 			chunks.set(key, { texture, sprite });
 		}
 		return chunks.get(key)!;
 	}
 
+	/**
+	 * Get the color for a team, caching it in TEAM_COLORS
+	 * @param teamId Team ID
+	 */
 	function getTeamColor(teamId: number): number {
 		if (!(teamId in TEAM_COLORS)) {
-			// Pull from the decoded teams data
 			const hex = data.teams[teamId]?.color ?? "#ffffff";
 			TEAM_COLORS[teamId] = parseInt(hex.replace("#", ""), 16);
 		}
 		return TEAM_COLORS[teamId];
 	}
 
+	/**
+	 * Render changes from the chessellator, updating chunks, rendering changed chunks, and pruning old chunks
+	 * @param changes Int32Array of [x, y, teamId, x, y, teamId, ...]
+	 */
 	export function renderChanges(changes: Int32Array) {
 		// Group changes by chunk
-		const byChunk = new Map<string, ChunkUpdates>();
+		const chunkChanges = new Map<string, ChunkUpdates>();
 		for (let i = 0; i < changes.length; i += 3) {
 			const x = changes[i];
 			const y = changes[i + 1];
@@ -84,10 +105,10 @@
 			const chunkRing = Math.max(Math.abs(cx), Math.abs(cy));
 			lastChunkRings.set(team, chunkRing);
 
-			if (!byChunk.has(key)) {
-				byChunk.set(key, { cx, cy, cells: [] });
+			if (!chunkChanges.has(key)) {
+				chunkChanges.set(key, { cx, cy, cells: [] });
 			}
-			byChunk.get(key)!.cells.push({
+			chunkChanges.get(key)!.cells.push({
 				lx: x - cx * CHUNK_SIZE,
 				ly: y - cy * CHUNK_SIZE,
 				team,
@@ -95,21 +116,21 @@
 			squareCount++;
 		}
 
-		// Render each affected chunk
-		for (const { cx, cy, cells } of byChunk.values()) {
+		// Render each changed chunk
+		for (const { cx, cy, cells } of chunkChanges.values()) {
 			const { texture } = getOrCreateChunk(cx, cy);
 
 			tempGraphics.clear();
 			for (const { lx, ly, team } of cells) {
 				tempGraphics
-					.rect(lx * CELL_SIZE, ly * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+					.rect(lx, ly, 1, 1)
 					.fill(getTeamColor(team));
 			}
 
 			app.renderer.render({
 				container: tempGraphics,
 				target: texture,
-				clear: false, // preserve existing pixels!
+				clear: false,
 			});
 		}
 
@@ -178,17 +199,23 @@
 		app?.destroy();
 	});
 
+	/**
+	 * Zoom the view, keeping the point (x, y) fixed on the screen
+	 * @param scale Zoom scale (e.g. 1.1 to zoom in, 0.9 to zoom out)
+	 * @param x Screen X coordinate to zoom around
+	 * @param y Screen Y coordinate to zoom around
+	 */
 	export function zoom(scale: number, x: number, y: number) {
-		// Center of the screen in world space
-		const cx = (app.screen.width / 2 - world.x) / world.scale.x;
-		const cy = (app.screen.height / 2 - world.y) / world.scale.y;
+		// Convert screen coordinates to world coordinates
+		const cx = (x - world.x) / world.scale.x;
+		const cy = (y - world.y) / world.scale.y;
 
 		world.scale.x *= scale;
 		world.scale.y *= scale;
 
 		// Adjust position so the center point stays fixed
-		world.x = app.screen.width / 2 - cx * world.scale.x;
-		world.y = app.screen.height / 2 - cy * world.scale.y;
+		world.x = x - cx * world.scale.x;
+		world.y = y - cy * world.scale.y;
 
 		if (dragging) {
 			stageStart = { x: world.x, y: world.y };
