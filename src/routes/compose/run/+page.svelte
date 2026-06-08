@@ -50,7 +50,7 @@
 	}
 
 	function animate() {
-		step(100);
+		step(Math.max(10, Math.ceil(Math.sqrt(squareCount))));
 		rafId = requestAnimationFrame(animate);
 	}
 
