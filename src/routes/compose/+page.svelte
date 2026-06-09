@@ -22,10 +22,10 @@
 		url.searchParams.set("t", encoded);
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		goto(url, {
-        replaceState: true,
-        noScroll: true,
-        keepFocus: true
-    });
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true,
+		});
 	});
 
 	function run() {

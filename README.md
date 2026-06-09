@@ -10,15 +10,6 @@ Start the development server:
 
 ```sh
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-In a separate terminal, start the rust watcher to get hot reloads for rust changes:
-
-```sh
-npm run wasm:dev
 ```
 
 ## Building
@@ -26,7 +17,7 @@ npm run wasm:dev
 To create a production version of the app:
 
 ```sh
-npm run wasm:build
+npm run build:wasm
 npm run build
 ```
 
