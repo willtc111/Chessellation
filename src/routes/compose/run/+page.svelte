@@ -93,9 +93,19 @@
 			</div>
 
 			<div class="flex justify-center gap-2">
-				<button class="zoomBtn" onclick={() => visualizer.zoom(0.9, window.innerWidth / 2, window.innerHeight / 2)}> - </button>
+				<button
+					class="zoomBtn"
+					onclick={() => visualizer.zoom(0.9, window.innerWidth / 2, window.innerHeight / 2)}
+				>
+					-
+				</button>
 				<span>Zoom</span>
-				<button class="zoomBtn" onclick={() => visualizer.zoom(1.1, window.innerWidth / 2, window.innerHeight / 2)}> + </button>
+				<button
+					class="zoomBtn"
+					onclick={() => visualizer.zoom(1.1, window.innerWidth / 2, window.innerHeight / 2)}
+				>
+					+
+				</button>
 			</div>
 
 			<div class="grow text-right sm:grow-0">

@@ -21,9 +21,9 @@
 	type Props = {
 		data: {
 			teams: Team[];
-		},
+		};
 		squareCount: number;
-	}
+	};
 
 	let { data, squareCount = $bindable(0) }: Props = $props();
 
@@ -135,9 +135,7 @@
 
 			tempGraphics.clear();
 			for (const { lx, ly, team } of cells) {
-				tempGraphics
-					.rect(lx, ly, 1, 1)
-					.fill(getTeamColor(team));
+				tempGraphics.rect(lx, ly, 1, 1).fill(getTeamColor(team));
 			}
 
 			app.renderer.render({
@@ -148,7 +146,7 @@
 		}
 		squareCount += changes.length / 3;
 
-		const minRing = lastTeamRings.values().reduce((a,b) => Math.min(a,b), Infinity);
+		const minRing = lastTeamRings.values().reduce((a, b) => Math.min(a, b), Infinity);
 		if (minRing > nextPruneRing) {
 			nextPruneRing += 64;
 			pruneChunks(minRing);
