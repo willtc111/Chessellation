@@ -61,7 +61,6 @@
 	function getOrCreateChunk(cx: number, cy: number) {
 		const key = getChunkKey(cx, cy);
 		if (!chunks.has(key)) {
-			console.log(`Creating chunk ${key}`);
 			const texture = RenderTexture.create({
 				width: CHUNK_SIZE,
 				height: CHUNK_SIZE,
@@ -77,16 +76,13 @@
 	}
 
 	function pruneChunks(minRing: number) {
-		console.log(`Chunks: ${chunks.size}, minRing: ${minRing}`);
 		for (const [key] of chunks) {
 			const [cx, cy] = key.split(",").map(Number);
 			const chunkOuterRing = getChunkOuterRing(cx, cy);
 			if (chunkOuterRing < minRing) {
-				console.log(`Removing chunk ${key} (ring ${chunkOuterRing})`);
 				chunks.delete(key);
 			}
 		}
-		console.log(`Chunks: ${chunks.size}`);
 	}
 
 	function getChunkOuterRing(cx: number, cy: number): number {
