@@ -40,7 +40,8 @@
 	const TEAM_COLORS: Record<number, number> = {};
 	const CHUNK_SIZE = 64; // Cells per chunk
 	const chunks = new Map<string, Chunk>();
-	const lastChunkRings = new Map<number, number>();
+	const lastTeamRings = new Map<number, number>();
+	let nextPruneRing = 32;
 	const tempGraphics = new Graphics();
 
 	/**
@@ -60,18 +61,36 @@
 	function getOrCreateChunk(cx: number, cy: number) {
 		const key = getChunkKey(cx, cy);
 		if (!chunks.has(key)) {
+			console.log(`Creating chunk ${key}`);
 			const texture = RenderTexture.create({
 				width: CHUNK_SIZE,
 				height: CHUNK_SIZE,
 				scaleMode: "nearest",
 			});
 			const sprite = new Sprite(texture);
-			sprite.x = cx * CHUNK_SIZE;
-			sprite.y = cy * CHUNK_SIZE;
+			sprite.x = cx * CHUNK_SIZE - CHUNK_SIZE / 2;
+			sprite.y = cy * CHUNK_SIZE - CHUNK_SIZE / 2;
 			world.addChild(sprite);
 			chunks.set(key, { texture, sprite });
 		}
 		return chunks.get(key)!;
+	}
+
+	function pruneChunks(minRing: number) {
+		console.log(`Chunks: ${chunks.size}, minRing: ${minRing}`);
+		for (const [key] of chunks) {
+			const [cx, cy] = key.split(",").map(Number);
+			const chunkOuterRing = getChunkOuterRing(cx, cy);
+			if (chunkOuterRing < minRing) {
+				console.log(`Removing chunk ${key} (ring ${chunkOuterRing})`);
+				chunks.delete(key);
+			}
+		}
+		console.log(`Chunks: ${chunks.size}`);
+	}
+
+	function getChunkOuterRing(cx: number, cy: number): number {
+		return (Math.max(Math.abs(cx), Math.abs(cy)) + 0.5) * CHUNK_SIZE;
 	}
 
 	/**
@@ -98,22 +117,20 @@
 			const y = changes[i + 1];
 			const team = changes[i + 2];
 
-			const cx = Math.floor(x / CHUNK_SIZE);
-			const cy = Math.floor(y / CHUNK_SIZE);
+			const cx = Math.floor((x + CHUNK_SIZE / 2) / CHUNK_SIZE);
+			const cy = Math.floor((y + CHUNK_SIZE / 2) / CHUNK_SIZE);
 			const key = getChunkKey(cx, cy);
 
-			const chunkRing = Math.max(Math.abs(cx), Math.abs(cy));
-			lastChunkRings.set(team, chunkRing);
+			lastTeamRings.set(team, Math.max(Math.abs(x), Math.abs(y)));
 
 			if (!chunkChanges.has(key)) {
 				chunkChanges.set(key, { cx, cy, cells: [] });
 			}
 			chunkChanges.get(key)!.cells.push({
-				lx: x - cx * CHUNK_SIZE,
-				ly: y - cy * CHUNK_SIZE,
+				lx: x - (cx * CHUNK_SIZE - CHUNK_SIZE / 2),
+				ly: y - (cy * CHUNK_SIZE - CHUNK_SIZE / 2),
 				team,
 			});
-			squareCount++;
 		}
 
 		// Render each changed chunk
@@ -133,15 +150,12 @@
 				clear: false,
 			});
 		}
+		squareCount += changes.length / 3;
 
-		// Prune old chunks
-		const minRing = Math.min(...lastChunkRings.values());
-		for (const [key] of chunks) {
-			const [cx, cy] = key.split(",").map(Number);
-			const chunkRing = Math.max(Math.abs(cx), Math.abs(cy));
-			if (chunkRing < minRing) {
-				chunks.delete(key);
-			}
+		const minRing = lastTeamRings.values().reduce((a,b) => Math.min(a,b), Infinity);
+		if (minRing > nextPruneRing) {
+			nextPruneRing += 64;
+			pruneChunks(minRing);
 		}
 	}
 
