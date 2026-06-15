@@ -1,11 +1,21 @@
 <script lang="ts">
-	import { applyOffsetsToKernel, emptyKernel, PRESET_OFFSETS } from "$lib/teams";
-	let { kernel = $bindable() } = $props();
+	import { clipboard } from "$lib/KernelClipboard.svelte";
+	import { applyOffsetsToKernel, emptyKernel, PRESET_OFFSETS, type Kernel } from "$lib/teams";
+
+	let { kernel = $bindable<Kernel>(), removeMember, disableRemove } = $props();
 	let center = $derived(Math.floor(kernel.length / 2));
 
 	function resetKernel() {
 		kernel = emptyKernel();
 		presetIndex = 0;
+	}
+
+	function copyKernel() {
+		clipboard.set(kernel);
+	}
+
+	function pasteKernel() {
+		kernel = clipboard.get() ?? kernel;
 	}
 
 	let presetIndex: number | undefined = $state(undefined);
@@ -21,8 +31,8 @@
 </script>
 
 <div class="flex flex-col gap-1">
-	<div class="flex flex-nowrap items-center justify-between gap-2">
-		<div class="input-group grid-cols-[auto_1fr_auto]">
+	<div class="controlsRow">
+		<div class="input-group grow grid-cols-[auto_1fr_auto]">
 			<label class="ig-cell preset-tonal" for="load">Load</label>
 			<select
 				name="load"
@@ -39,10 +49,27 @@
 				{/each}
 			</select>
 		</div>
-
-		<button class="btn preset-filled-surface-400-600" onclick={resetKernel} title="Clear kernel">
-			Clear
+		<button
+			onclick={removeMember}
+			class="btn preset-filled-error-500"
+			disabled={disableRemove}
+			title="Remove piece"
+		>
+			X
 		</button>
+	</div>
+
+	<div class="controlsRow">
+		<button class="editButton" onclick={copyKernel} title="Copy kernel"> Copy </button>
+		<button
+			class="editButton"
+			onclick={pasteKernel}
+			title="Paste kernel"
+			disabled={clipboard.isEmpty()}
+		>
+			Paste
+		</button>
+		<button class="editButton" onclick={resetKernel} title="Clear kernel"> Clear </button>
 	</div>
 
 	<table class="w-fit border-collapse">
@@ -69,5 +96,11 @@
 <style>
 	td {
 		@apply aspect-square h-8 w-8 border border-surface-500;
+	}
+	.controlsRow {
+		@apply flex flex-nowrap items-center justify-between gap-2;
+	}
+	.editButton {
+		@apply btn h-8 grow preset-filled-surface-400-600;
 	}
 </style>
