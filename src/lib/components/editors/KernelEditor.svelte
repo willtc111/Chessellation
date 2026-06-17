@@ -1,9 +1,18 @@
 <script lang="ts">
 	import { clipboard } from "$lib/KernelClipboard.svelte";
-	import { applyOffsetsToKernel, emptyKernel, PRESET_OFFSETS, type Kernel } from "$lib/teams";
+	import {
+		applyOffsetsToKernel,
+		emptyKernel,
+		getKernelOffsets,
+		getPresetName,
+		PRESET_OFFSETS,
+		type Kernel,
+	} from "$lib/teams";
+	import { onMount } from "svelte";
 
 	let { kernel = $bindable<Kernel>(), removeMember, disableRemove } = $props();
 	let center = $derived(Math.floor(kernel.length / 2));
+	let presetIndex: number | undefined = $state(undefined);
 
 	function resetKernel() {
 		kernel = emptyKernel();
@@ -16,18 +25,28 @@
 
 	function pasteKernel() {
 		kernel = clipboard.get() ?? kernel;
+		detectPreset();
 	}
 
-	let presetIndex: number | undefined = $state(undefined);
 	function loadPreset() {
 		if (presetIndex == undefined) {
 			return;
 		}
 		kernel = applyOffsetsToKernel(PRESET_OFFSETS[presetIndex].offsets, emptyKernel());
 	}
-	function doCustom() {
-		presetIndex = undefined;
+
+	function detectPreset() {
+		const presetName = getPresetName(getKernelOffsets(kernel));
+		if (presetName != undefined) {
+			presetIndex = PRESET_OFFSETS.findIndex((p) => p.name == presetName);
+		} else {
+			presetIndex = undefined;
+		}
 	}
+
+	onMount(() => {
+		detectPreset();
+	});
 </script>
 
 <div class="flex flex-col gap-1">
@@ -81,7 +100,7 @@
 							<input
 								type="checkbox"
 								bind:checked={kernel[iRow][iCol]}
-								onchange={doCustom}
+								onchange={detectPreset}
 								class="input h-full w-full"
 								disabled={iRow == center && iCol == center}
 							/>

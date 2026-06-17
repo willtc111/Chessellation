@@ -15,7 +15,7 @@ export type Team = {
 	pieces: Piece[];
 };
 
-const KERNEL_SIZE = 9;
+export const KERNEL_SIZE = 9;
 
 export function emptyKernel(): Kernel {
 	const kernel = Array.from({ length: KERNEL_SIZE }, () =>
@@ -33,6 +33,12 @@ export const DEFAULT_MEMBER = {
 	kernel: EMPTY_KERNEL,
 };
 
+/**
+ * Get the offset coordinates of all active cells in the kernel.
+ * Offsets are relative to the kernel center and are in sorted order.
+ * @param kernel Kernel to read
+ * @returns Sorted offsets of all true cells
+ */
 export function getKernelOffsets(kernel: Kernel): Offset[] {
 	const center = Math.floor(kernel.length / 2);
 	const offsets: Offset[] = kernel.reduce(
@@ -48,6 +54,13 @@ export function getKernelOffsets(kernel: Kernel): Offset[] {
 	return offsets;
 }
 
+/**
+ * Apply the given offsets to the kernel, setting the corresponding cells to true.
+ * Mutates and returns the kernel for convenience.
+ * @param offsets Offsets to apply
+ * @param kernel Kernel to modify
+ * @returns The same kernel instance, but modified
+ */
 export function applyOffsetsToKernel(offsets: Offset[], kernel: Kernel): Kernel {
 	const halfSize = kernel.length / 2;
 	const center = Math.floor(halfSize);
@@ -66,36 +79,36 @@ export const PRESET_OFFSETS: Preset[] = [
 	{
 		name: "Knight",
 		offsets: [
-			[-2, -1],
-			[-2, 1],
 			[-1, -2],
-			[-1, 2],
-			[0, 0],
 			[1, -2],
-			[1, 2],
+			[-2, -1],
 			[2, -1],
+			[0, 0],
+			[-2, 1],
 			[2, 1],
+			[-1, 2],
+			[1, 2],
 		],
 	},
 	{
 		name: "Short Bishop",
 		offsets: [
 			[-4, -4],
-			[-4, 4],
-			[-3, -3],
-			[-3, 3],
-			[-2, -2],
-			[-2, 2],
-			[-1, -1],
-			[-1, 1],
-			[0, 0],
-			[1, -1],
-			[1, 1],
-			[2, -2],
-			[2, 2],
-			[3, -3],
-			[3, 3],
 			[4, -4],
+			[-3, -3],
+			[3, -3],
+			[-2, -2],
+			[2, -2],
+			[-1, -1],
+			[1, -1],
+			[0, 0],
+			[-1, 1],
+			[1, 1],
+			[-2, 2],
+			[2, 2],
+			[-3, 3],
+			[3, 3],
+			[-4, 4],
 			[4, 4],
 		],
 	},
@@ -103,123 +116,123 @@ export const PRESET_OFFSETS: Preset[] = [
 		name: "Short Rook",
 		offsets: [
 			[0, -4],
-			[0, 4],
 			[0, -3],
-			[0, 3],
 			[0, -2],
-			[0, 2],
 			[0, -1],
-			[0, 1],
-			[0, 0],
-			[-1, 0],
-			[1, 0],
-			[-2, 0],
-			[2, 0],
-			[-3, 0],
-			[3, 0],
 			[-4, 0],
+			[-3, 0],
+			[-2, 0],
+			[-1, 0],
+			[0, 0],
+			[1, 0],
+			[2, 0],
+			[3, 0],
 			[4, 0],
+			[0, 1],
+			[0, 2],
+			[0, 3],
+			[0, 4],
 		],
 	},
 	{
 		name: "Short Queen",
 		offsets: [
 			[-4, -4],
-			[-4, 0],
-			[-4, 4],
-			[-3, -3],
-			[-3, 0],
-			[-3, 3],
-			[-2, -2],
-			[-2, 0],
-			[-2, 2],
-			[-1, -1],
-			[-1, 0],
-			[-1, 1],
 			[0, -4],
-			[0, -3],
-			[0, -2],
-			[0, -1],
-			[0, 0],
-			[0, 1],
-			[0, 2],
-			[0, 3],
-			[0, 4],
-			[1, -1],
-			[1, 0],
-			[1, 1],
-			[2, -2],
-			[2, 0],
-			[2, 2],
-			[3, -3],
-			[3, 0],
-			[3, 3],
 			[4, -4],
+			[-3, -3],
+			[0, -3],
+			[3, -3],
+			[-2, -2],
+			[0, -2],
+			[2, -2],
+			[-1, -1],
+			[0, -1],
+			[1, -1],
+			[-4, 0],
+			[-3, 0],
+			[-2, 0],
+			[-1, 0],
+			[0, 0],
+			[1, 0],
+			[2, 0],
+			[3, 0],
 			[4, 0],
+			[-1, 1],
+			[0, 1],
+			[1, 1],
+			[-2, 2],
+			[0, 2],
+			[2, 2],
+			[-3, 3],
+			[0, 3],
+			[3, 3],
+			[-4, 4],
+			[0, 4],
 			[4, 4],
 		],
 	},
 	{
 		name: "King",
 		offsets: [
-			[-1, 0],
-			[0, -1],
-			[0, 0],
-			[0, 1],
-			[1, 0],
 			[-1, -1],
-			[-1, 1],
+			[0, -1],
 			[1, -1],
+			[-1, 0],
+			[0, 0],
+			[1, 0],
+			[-1, 1],
+			[0, 1],
 			[1, 1],
 		],
 	},
 	{
 		name: "Wazir",
 		offsets: [
-			[-1, 0],
 			[0, -1],
+			[-1, 0],
 			[0, 0],
-			[0, 1],
 			[1, 0],
+			[0, 1],
 		],
 	},
 	{
 		name: "Dabbaba",
 		offsets: [
-			[-2, 0],
 			[0, -2],
+			[-2, 0],
 			[0, 0],
-			[0, 2],
 			[2, 0],
+			[0, 2],
 		],
 	},
 	{
 		name: "Threeleaper",
 		offsets: [
-			[-3, 0],
 			[0, -3],
+			[-3, 0],
 			[0, 0],
-			[0, 3],
 			[3, 0],
+			[0, 3],
 		],
 	},
 	{
 		name: "Fourleaper",
 		offsets: [
-			[-4, 0],
 			[0, -4],
+			[-4, 0],
 			[0, 0],
-			[0, 4],
 			[4, 0],
+			[0, 4],
 		],
 	},
 	{
 		name: "Ferz",
 		offsets: [
 			[-1, -1],
-			[-1, 1],
-			[0, 0],
 			[1, -1],
+			[0, 0],
+			[-1, 1],
 			[1, 1],
 		],
 	},
@@ -227,9 +240,9 @@ export const PRESET_OFFSETS: Preset[] = [
 		name: "Alfil",
 		offsets: [
 			[-2, -2],
-			[-2, 2],
-			[0, 0],
 			[2, -2],
+			[0, 0],
+			[-2, 2],
 			[2, 2],
 		],
 	},
@@ -237,9 +250,9 @@ export const PRESET_OFFSETS: Preset[] = [
 		name: "Tripper",
 		offsets: [
 			[-3, -3],
-			[-3, 3],
-			[0, 0],
 			[3, -3],
+			[0, 0],
+			[-3, 3],
 			[3, 3],
 		],
 	},
@@ -247,102 +260,102 @@ export const PRESET_OFFSETS: Preset[] = [
 		name: "Commuter",
 		offsets: [
 			[-4, -4],
-			[-4, 4],
-			[0, 0],
 			[4, -4],
+			[0, 0],
+			[-4, 4],
 			[4, 4],
 		],
 	},
 	{
 		name: "Camel",
 		offsets: [
-			[-3, -1],
-			[-3, 1],
 			[-1, -3],
-			[-1, 3],
-			[0, 0],
 			[1, -3],
-			[1, 3],
+			[-3, -1],
 			[3, -1],
+			[0, 0],
+			[-3, 1],
 			[3, 1],
+			[-1, 3],
+			[1, 3],
 		],
 	},
 	{
 		name: "Zebra",
 		offsets: [
-			[-3, -2],
-			[-3, 2],
 			[-2, -3],
-			[-2, 3],
-			[0, 0],
 			[2, -3],
-			[2, 3],
+			[-3, -2],
 			[3, -2],
+			[0, 0],
+			[-3, 2],
 			[3, 2],
+			[-2, 3],
+			[2, 3],
 		],
 	},
 	{
 		name: "Giraffe",
 		offsets: [
-			[-4, -1],
-			[-4, 1],
 			[-1, -4],
-			[-1, 4],
-			[0, 0],
 			[1, -4],
-			[1, 4],
+			[-4, -1],
 			[4, -1],
+			[0, 0],
+			[-4, 1],
 			[4, 1],
+			[-1, 4],
+			[1, 4],
 		],
 	},
 	{
 		name: "Stag",
 		offsets: [
-			[-4, -2],
-			[-4, 2],
 			[-2, -4],
-			[-2, 4],
-			[0, 0],
 			[2, -4],
-			[2, 4],
+			[-4, -2],
 			[4, -2],
+			[0, 0],
+			[-4, 2],
 			[4, 2],
+			[-2, 4],
+			[2, 4],
 		],
 	},
 	{
 		name: "Antelope",
 		offsets: [
-			[-4, -3],
-			[-4, 3],
 			[-3, -4],
-			[-3, 4],
-			[0, 0],
 			[3, -4],
-			[3, 4],
+			[-4, -3],
 			[4, -3],
+			[0, 0],
+			[-4, 3],
 			[4, 3],
+			[-3, 4],
+			[3, 4],
 		],
 	},
 	{
 		name: "Nightrider",
 		offsets: [
-			[-2, -1],
-			[-2, 1],
-			[-1, -2],
-			[-1, 2],
-			[0, 0],
-			[1, -2],
-			[1, 2],
-			[2, -1],
-			[2, 1],
-			[-4, -2],
-			[-4, 2],
 			[-2, -4],
-			[-2, 4],
 			[2, -4],
-			[2, 4],
+			[-4, -2],
+			[-1, -2],
+			[1, -2],
 			[4, -2],
+			[-2, -1],
+			[2, -1],
+			[0, 0],
+			[-2, 1],
+			[2, 1],
+			[-4, 2],
+			[-1, 2],
+			[1, 2],
 			[4, 2],
+			[-2, 4],
+			[2, 4],
 		],
 	},
 	{
@@ -355,3 +368,30 @@ export const PRESET_OFFSETS: Preset[] = [
 		).flat(),
 	},
 ];
+
+/**
+ * Find the name of the preset kernel that has the given offsets
+ * @param offsets Sorted offsets
+ * @returns The name of the matching preset, otherwise undefined
+ */
+export function getPresetName(offsets: Offset[]): string | undefined {
+	return PRESET_OFFSETS.find((preset) => {
+		return (
+			preset.offsets.length == offsets.length &&
+			offsets.every(
+				(offset, i) => offset[0] === preset.offsets[i][0] && offset[1] === preset.offsets[i][1]
+			)
+		);
+	})?.name;
+}
+
+/**
+ * Sort the offsets from top to bottom and then left to right
+ * @param offsets Offsets to sort
+ * @return Sorted offsets
+ */
+export function sortOffsets(offsets: Offset[]): Offset[] {
+	return [...offsets].sort(([colA, rowA], [colB, rowB]) =>
+		rowA !== rowB ? rowA - rowB : colA - colB
+	);
+}
